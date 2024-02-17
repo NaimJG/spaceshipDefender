@@ -9,12 +9,28 @@ ANCHO = 800
 ALTO = 600
 white = (255, 255, 255)
 grey = (155, 155, 155)
+dark_grey = (100, 100, 100)
+darker_grey = (85, 85, 85)
 
 screen = pygame.display.set_mode((ANCHO, ALTO))
-
+pygame.mouse.set_visible(0)
 
 # Estrellas
 stars = []
+
+class Crossair(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        # Cargar imagen original
+        self.image_original = pygame.image.load('mira.png')
+        # Escalar la imagen a 30x30
+        self.escalar(70, 70)
+
+    def escalar(self, width, height):
+        # Escalar la imagen
+        self.image = pygame.transform.scale(self.image_original, (width, height))
+        # Obtener rectángulo de la imagen
+        self.rect = self.image.get_rect()
 
 # Función para generar estrellas
 def spawn_star():
@@ -32,6 +48,8 @@ def distance(p1, p2):
 clock = pygame.time.Clock()
 spawn_timer = 0
 star_spawn_timer = 0
+
+mira = Crossair()
 
 while True:
     for event in pygame.event.get():
@@ -57,19 +75,34 @@ while True:
 
     screen.fill((0,0,0))
 
-    pygame.draw.line(screen, grey, [0, 80], [193, 167], 8)
-    pygame.draw.line(screen, grey, [605, 433], [ANCHO, 550], 8)
-
-    pygame.draw.line(screen, grey, [ANCHO, 80], [605, 167], 8)
-    pygame.draw.line(screen, grey, [0, 550], [195, 433], 8)
-
-    pygame.draw.circle(screen, grey, (ANCHO//2, ALTO//2), 250, 8)
-
     # Dibujar líneas cortas para representar estrellas
     for star in stars:
         end_point = (int(star[0] + 8 * math.cos(star[2])), int(star[1] + 8 * math.sin(star[2])))
         pygame.draw.line(screen, white, (int(star[0]), int(star[1])), end_point, 2)
 
+
+    points = [(0, 78), (194, 165), (189, 171), (0, 100)]
+    pygame.draw.polygon(screen, grey, points)
+
+    points = [(ANCHO, 78), (606, 165), (611, 171), (ANCHO, 100)]
+    pygame.draw.polygon(screen, grey, points)
+
+    pygame.draw.circle(screen, grey, (ANCHO//2, ALTO//2), 250, 8)
+
+    # Rellenar la sección entre las dos líneas inferiores y el círculo
+    points = [(-100, ALTO), (190, 433), (ANCHO//2, ALTO//2 + 120), (610, 433), (ANCHO + 100, ALTO)]
+    pygame.draw.polygon(screen, dark_grey, points)
+
+    # Rellenar la sección entre las dos líneas inferiores y el círculo
+    points = [(70, ALTO), (200, 495), (ANCHO//2, ALTO//2 + 180), (595, 495), (ANCHO - 70, ALTO)]
+    pygame.draw.polygon(screen, darker_grey, points)
+
+    mouse_pos = pygame.mouse.get_pos()
+    mouse_x = mouse_pos[0]
+    mouse_y = mouse_pos[1]
+
+    # Dibujar mira en pantalla
+    screen.blit(mira.image, (mouse_x - mira.rect.width // 2, mouse_y - mira.rect.height // 2))
 
     pygame.display.flip()
     clock.tick(60)
